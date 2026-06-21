@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learning OS — Parametrik Prompt Mühendisi v2</title>
+    <meta name="description" content="AI destekli parametrik prompt üretici. Herhangi bir konuyu sistematik olarak derinlemesine öğrenmek için optimize edilmiş prompt şablonları.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        /* ══════════════════════ VARIABLES ══════════════════════ */
+        :root {
+            --bg-deep: #06060f;
+            --bg-card: rgba(15, 17, 30, 0.7);
+            --bg-card-hover: rgba(20, 22, 40, 0.85);
+            --bg-input: rgba(10, 12, 25, 0.8);
+            --border: rgba(99, 102, 241, 0.15);
+            --border-active: rgba(99, 102, 241, 0.5);
+            --text-primary: #f0f0f8;
+            --text-secondary: #8b8fa8;
+            --text-muted: #555872;
+            --accent-1: #6366f1;
+            --accent-2: #8b5cf6;
+            --accent-3: #06b6d4;
+            --gradient-main: linear-gradient(135deg, #6366f1, #8b5cf6, #a78bfa);
+            --gradient-warm: linear-gradient(135deg, #f59e0b, #ef4444);
+            --gradient-cool: linear-gradient(135deg, #06b6d4, #3b82f6);
+            --gradient-green: linear-gradient(135deg, #10b981, #059669);
+            --radius: 14px;
+            --radius-sm: 8px;
+            --shadow: 0 8px 32px rgba(0,0,0,0.4);
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* ══════════════════════ RESET & BASE ══════════════════════ */
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* ══════════════════════ ANIMATED BG ══════════════════════ */
+        .bg-mesh {
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
+            overflow: hidden;
+        }
+        .bg-mesh::before {
+            content: '';
+            position: absolute;
+            width: 250%; height: 250%;
+            top: -75%; left: -75%;
+            background:
+                radial-gradient(circle at 20% 30%, rgba(99, 102, 241, 0.12) 0%, transparent 45%),
+                radial-gradient(circle at 75% 65%, rgba(139, 92, 246, 0.1) 0%, transparent 45%),
+                radial-gradient(circle at 50% 80%, rgba(6, 182, 212, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 85% 15%, rgba(244, 63, 94, 0.06) 0%, transparent 40%);
+            animation: meshSpin 40s linear infinite;
+        }
+        @keyframes meshSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* ══════════════════════ SCROLLBAR ══════════════════════ */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.3); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(99,102,241,0.5); }
+
+        /* ══════════════════════ APP SHELL ══════════════════════ */
+        .app {
+            position: relative; z-index: 1;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem 4rem;
+        }
+
+        /* ══════════════════════ HEADER ══════════════════════ */
+        .header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            animation: fadeInDown 0.8s ease-out;
+        }
+        .header-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 6px 16px;
+            background: rgba(99,102,241,0.12);
+            border: 1px solid rgba(99,102,241,0.25);
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--accent-1);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+        .header h1 {
+            font-size: clamp(2rem, 5vw, 3.2rem);
+            font-weight: 900;
+            background: var(--gradient-main);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.15;
+            letter-spacing: -1px;
+        }
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+            margin-top: 0.5rem;
+            font-weight: 400;
+        }
+
+        /* ══════════════════════ CARD ══════════════════════ */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.75rem;
+            margin-bottom: 1.25rem;
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            box-shadow: var(--shadow);
+            transition: border-color var(--transition);
+            animation: fadeInUp 0.6s ease-out both;
+        }
+        .card:hover { border-color: var(--border-active); }
+        .card-title {
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-secondary);
+            margin-bottom: 1.25rem;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .card-title .dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: var(--accent-1);
+            box-shadow: 0 0 8px rgba(99,102,241,0.5);
+        }
+
+        /* ══════════════════════ FORM ELEMENTS ══════════════════════ */
+        .input-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        .input-group { display: flex; flex-direction: column; gap: 6px; }
+        .input-group label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            letter-spacing: 0.5px;
+        }
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            transition: all var(--transition);
+            outline: none;
+            appearance: none;
+        }
+        .input-group input::placeholder { color: var(--text-muted); }
+        .input-group input:focus,
+        .input-group select:focus {
+            border-color: var(--accent-1);
+            box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
+        }
+        .input-group select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238b8fa8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 36px;
+            cursor: pointer;
+        }
+        .input-group select option {
+            background: #1a1a2e;
+            color: var(--text-primary);
+        }
+
+        .config-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+        }
+
+        /* ══════════════════════ PRESETS ══════════════════════ */
+        .presets-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .preset-btn {
+            padding: 8px 16px;
+            background: rgba(99,102,241,0.08);
+            border: 1px solid rgba(99,102,241,0.2);
+            border-radius: 100px;
+            color: var(--text-secondary);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+            white-space: nowrap;
+        }
+        .preset-btn:hover {
+            background: rgba(99,102,241,0.18);
+            border-color: var(--accent-1);
+            color: var(--text-primary);
+            transform: translateY(-1px);
+        }
+        .preset-btn.active {
+            background: var(--accent-1);
+            border-color: var(--accent-1);
+            color: white;
+        }
+
+        /* ══════════════════════ MODULES ══════════════════════ */
+        .modules-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 1.25rem;
+        }
+        .modules-header .title-side {
+            display: flex; align-items: center; gap: 12px;
+        }
+        .module-counter {
+            padding: 4px 12px;
+            background: rgba(99,102,241,0.12);
+            border-radius: 100px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--accent-1);
+        }
+        .modules-actions {
+            display: flex; gap: 8px;
+        }
+        .modules-actions button {
+            padding: 6px 14px;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text-secondary);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+        .modules-actions button:hover {
+            border-color: var(--accent-1);
+            color: var(--text-primary);
+        }
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+        }
+        .module-card {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 14px;
+            background: rgba(99,102,241,0.04);
+            border: 1px solid transparent;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all var(--transition);
+            user-select: none;
+        }
+        .module-card:hover {
+            background: rgba(99,102,241,0.08);
+        }
+        .module-card.active {
+            background: rgba(99,102,241,0.1);
+            border-color: rgba(99,102,241,0.35);
+        }
+        .module-card.active .module-icon {
+            transform: scale(1.1);
+        }
+        .module-icon {
+            font-size: 1.3rem;
+            line-height: 1;
+            flex-shrink: 0;
+            transition: transform var(--transition);
+        }
+        .module-info { flex: 1; min-width: 0; }
+        .module-name {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1.3;
+        }
+        .module-desc {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+            line-height: 1.35;
+        }
+        .module-toggle {
+            flex-shrink: 0;
+            width: 36px; height: 20px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 10px;
+            position: relative;
+            transition: background var(--transition);
+            margin-top: 2px;
+        }
+        .module-toggle::after {
+            content: '';
+            position: absolute;
+            top: 3px; left: 3px;
+            width: 14px; height: 14px;
+            background: var(--text-muted);
+            border-radius: 50%;
+            transition: all var(--transition);
+        }
+        .module-card.active .module-toggle {
+            background: var(--accent-1);
+        }
+        .module-card.active .module-toggle::after {
+            left: 19px;
+            background: white;
+        }
+
+        /* ══════════════════════ ACTIONS ══════════════════════ */
+        .actions-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 1.25rem;
+            animation: fadeInUp 0.6s ease-out 0.3s both;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 24px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all var(--transition);
+            text-decoration: none;
+            white-space: nowrap;
+        }
+        .btn-primary {
+            background: var(--gradient-main);
+            color: white;
+            flex: 1;
+            justify-content: center;
+            font-size: 1rem;
+            box-shadow: 0 4px 20px rgba(99,102,241,0.35);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(99,102,241,0.45);
+        }
+        .btn-primary:active { transform: translateY(0); }
+        .btn-secondary {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+        .btn-secondary:hover {
+            border-color: var(--accent-1);
+            color: var(--text-primary);
+            background: rgba(99,102,241,0.08);
+        }
+        .btn-gemini {
+            background: linear-gradient(135deg, #4285f4, #34a853, #fbbc04, #ea4335);
+            background-size: 300% 300%;
+            color: white;
+            animation: geminiShimmer 4s ease infinite;
+        }
+        @keyframes geminiShimmer {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        .btn-gemini:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(66,133,244,0.3); }
+
+        /* ══════════════════════ PREVIEW ══════════════════════ */
+        .preview-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .preview-stats {
+            display: flex; gap: 12px;
+        }
+        .stat-chip {
+            padding: 4px 10px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 100px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .preview-box {
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 1.25rem;
+            max-height: 500px;
+            overflow-y: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.82rem;
+            line-height: 1.7;
+            color: var(--text-secondary);
+            white-space: pre-wrap;
+            word-break: break-word;
+            tab-size: 2;
+            transition: border-color var(--transition);
+        }
+        .preview-box:hover { border-color: var(--border-active); }
+        .preview-empty {
+            color: var(--text-muted);
+            text-align: center;
+            padding: 3rem 1rem;
+            font-family: 'Inter', sans-serif;
+            font-style: italic;
+        }
+
+        /* ══════════════════════ TOAST ══════════════════════ */
+        .toast-container {
+            position: fixed;
+            bottom: 24px; right: 24px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column-reverse;
+            gap: 8px;
+        }
+        .toast {
+            padding: 14px 20px;
+            background: rgba(15,17,30,0.95);
+            border: 1px solid var(--border-active);
+            border-radius: var(--radius-sm);
+            backdrop-filter: blur(20px);
+            color: var(--text-primary);
+            font-size: 0.85rem;
+            font-weight: 600;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            animation: toastIn 0.4s ease-out;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .toast.out { animation: toastOut 0.3s ease-in forwards; }
+        @keyframes toastIn {
+            from { transform: translateX(100px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes toastOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100px); opacity: 0; }
+        }
+
+        /* ══════════════════════ FOOTER ══════════════════════ */
+        .footer {
+            text-align: center;
+            padding-top: 2rem;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+        }
+        .footer a { color: var(--accent-1); text-decoration: none; }
+
+        /* ══════════════════════ ANIMATIONS ══════════════════════ */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-24px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+        .delay-4 { animation-delay: 0.4s; }
+
+        /* ══════════════════════ RESPONSIVE ══════════════════════ */
+        @media (max-width: 768px) {
+            .app { padding: 1rem 1rem 3rem; }
+            .input-row { grid-template-columns: 1fr; }
+            .config-grid { grid-template-columns: 1fr 1fr; }
+            .modules-grid { grid-template-columns: 1fr 1fr; }
+            .actions-bar { flex-direction: column; }
+            .btn { justify-content: center; }
+        }
+        @media (max-width: 480px) {
+            .config-grid { grid-template-columns: 1fr; }
+            .modules-grid { grid-template-columns: 1fr; }
+            .card { padding: 1.25rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="bg-mesh"></div>
+
+<div class="app">
+
+    <!-- ═══════ HEADER ═══════ -->
+    <header class="header">
+        <div class="header-badge">⚛ Learning Operating System</div>
+        <h1>Parametrik Prompt Mühendisi</h1>
+        <p>Herhangi bir konuyu sistematik olarak parçala, analiz et, öğren.</p>
+    </header>
+
+    <!-- ═══════ CORE INPUTS ═══════ -->
+    <section class="card delay-1">
+        <div class="card-title"><span class="dot"></span> Hedef Tanımı</div>
+        <div class="input-row">
+            <div class="input-group">
+                <label for="inp-konu">Öğrenilecek Konu</label>
+                <input type="text" id="inp-konu" placeholder="Transformer Mimarisi, Otonom Sinir Sistemi, Kuantum Dolanıklık...">
+            </div>
+            <div class="input-group">
+                <label for="inp-alan">Hakim Olduğunuz Alan</label>
+                <input type="text" id="inp-alan" placeholder="Yazılım Mühendisliği, Elektrik Devreleri, Biyoloji...">
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════ CONFIG GRID ═══════ -->
+    <section class="card delay-2">
+        <div class="card-title"><span class="dot"></span> Parametreler</div>
+        <div class="config-grid">
+            <div class="input-group">
+                <label for="sel-seviye">Bilgi Seviyesi</label>
+                <select id="sel-seviye">
+                    <option value="otomatik">🎯 Otomatik (AI Belirler)</option>
+                    <option value="acemi">🌱 Acemi</option>
+                    <option value="orta">📘 Orta</option>
+                    <option value="ileri">🔬 İleri</option>
+                    <option value="uzman">🧠 Uzman</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label for="sel-mod">Öğrenme Modu</label>
+                <select id="sel-mod">
+                    <option value="karma">🔀 Karma (Adaptif)</option>
+                    <option value="feynman">🎓 Feynman</option>
+                    <option value="sistem">⚙️ Sistem Analizi</option>
+                    <option value="sokratik">💬 Sokratik</option>
+                    <option value="ilkeler">🧱 Birinci İlkeler</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label for="sel-derinlik">Analiz Derinliği</label>
+                <select id="sel-derinlik">
+                    <option value="orta">📊 Orta</option>
+                    <option value="temel">📌 Temel</option>
+                    <option value="derin">🔍 Derin</option>
+                    <option value="kapsamli">🌊 Kapsamlı</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label for="sel-format">Çıktı Formatı</label>
+                <select id="sel-format">
+                    <option value="markdown">📝 Markdown</option>
+                    <option value="tablo">📊 Tablo Ağırlıklı</option>
+                    <option value="ders">📖 Ders Notu</option>
+                    <option value="quiz">❓ Quiz Destekli</option>
+                </select>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════ PRESETS ═══════ -->
+    <section class="card delay-3">
+        <div class="card-title"><span class="dot"></span> Hazır Şablonlar</div>
+        <div class="presets-row">
+            <button class="preset-btn" data-preset="hizli">⚡ Hızlı Kavrama</button>
+            <button class="preset-btn" data-preset="derin">🔬 Derin Analiz</button>
+            <button class="preset-btn" data-preset="sinav">📚 Sınav Hazırlık</button>
+            <button class="preset-btn" data-preset="muhendis">🏗️ Mühendis Modu</button>
+            <button class="preset-btn" data-preset="tam">🎓 Tam Kapsamlı</button>
+        </div>
+    </section>
+
+    <!-- ═══════ MODULES ═══════ -->
+    <section class="card delay-4" id="modules-section">
+        <div class="modules-header">
+            <div class="title-side">
+                <div class="card-title" style="margin-bottom:0"><span class="dot"></span> Öğrenme Modülleri</div>
+                <span class="module-counter" id="mod-counter">0 / 15</span>
+            </div>
+            <div class="modules-actions">
+                <button onclick="selectAll()">Tümünü Seç</button>
+                <button onclick="deselectAll()">Temizle</button>
+            </div>
+        </div>
+        <div class="modules-grid" id="modules-grid">
+            <!-- JS tarafından doldurulur -->
+        </div>
+    </section>
+
+    <!-- ═══════ ACTION BUTTONS ═══════ -->
+    <div class="actions-bar">
+        <button class="btn btn-primary" onclick="generatePrompt()">
+            <span>🚀</span> Prompt Üret
+        </button>
+        <button class="btn btn-secondary" onclick="copyPrompt()">
+            <span>📋</span> Kopyala
+        </button>
+        <button class="btn btn-gemini" onclick="openGemini()">
+            <span>✦</span> Gemini'de Aç
+        </button>
+        <button class="btn btn-secondary" onclick="saveSettings()">
+            <span>💾</span> Kaydet
+        </button>
+        <button class="btn btn-secondary" onclick="resetAll()">
+            <span>↺</span> Sıfırla
+        </button>
+    </div>
+
+    <!-- ═══════ PREVIEW ═══════ -->
+    <section class="card" id="preview-card">
+        <div class="preview-header">
+            <div class="card-title" style="margin-bottom:0"><span class="dot"></span> Üretilen Prompt</div>
+            <div class="preview-stats">
+                <span class="stat-chip" id="stat-chars">0 karakter</span>
+                <span class="stat-chip" id="stat-tokens">~0 token</span>
+                <span class="stat-chip" id="stat-modules">0 modül</span>
+            </div>
+        </div>
+        <div class="preview-box" id="preview-box">
+            <div class="preview-empty">Konu girin ve "Prompt Üret" butonuna tıklayın.</div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        Learning OS v2.0 — Parametrik Prompt Mühendisi &middot; Tüm veriler tarayıcınızda kalır.
+    </footer>
+</div>
+
+<!-- ═══════ TOASTS ═══════ -->
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   DATA — Modül tanımları, mod/derinlik/format metinleri
+   ═══════════════════════════════════════════════════════════════ */
+
+const MODULES = [
+    {
+        id: 'kalibrasyon', icon: '🎯', name: 'Seviye Kalibrasyonu',
+        desc: 'Seviyeni 3 soruyla ölç',
+        prompt: `0. SEVİYE KALİBRASYONU
+Konuya başlamadan önce seviyemi ölçmek için 3 kısa, hedefli soru sor.
+Cevaplarıma göre seviyemi belirle: Acemi / Orta / İleri / Uzman.
+Tüm sonraki açıklamaları bu seviyeye göre ölçeklendir.`
+    },
+    {
+        id: 'ontoloji', icon: '🧬', name: 'Ontoloji',
+        desc: 'Temel yapı taşlarını belirle',
+        prompt: `1. ONTOLOJİ (Birinci İlkeler)
+Bu konuyu oluşturan en temel, bölünemez 3-5 yapı taşını belirle.
+Her birinin tanımını, rolünü ve diğerleriyle ilişkisini açıkla.
+Bu bileşenler olmadan konseptin neden var olamayacağını göster.`
+    },
+    {
+        id: 'nedensellik', icon: '⚡', name: 'Nedensel Zorunluluk',
+        desc: 'Neden var olduğunu açıkla',
+        prompt: `2. NEDENSEL ZORUNLULUK
+Her yapı taşı için şu soruları cevapla:
+- Bu bileşen ortadan kalkarsa sistem neden çalışamaz?
+- Bu parçanın evrimsel, fiziksel veya mantıksal zorunluluğu nedir?
+- Alternatifi var mı? Varsa neden bu tercih edildi?`
+    },
+    {
+        id: 'mekanizma', icon: '⚙️', name: 'Mekanizma',
+        desc: 'Girdi → Süreç → Çıktı analizi',
+        prompt: `3. MEKANİZMA
+Sistemin çalışma mekanizmasını adım adım çözümle:
+- Girdi: Sisteme ne girer?
+- Süreç: İçeride ne olur? Her adımı sırayla anlat.
+- Çıktı: Sonuçta ne üretilir?
+- Geri bildirim döngüsü varsa belirt.`
+    },
+    {
+        id: 'evrim', icon: '📜', name: 'Tarihsel Evrim',
+        desc: 'Nasıl ve neden ortaya çıktı',
+        prompt: `4. TARİHSEL EVRİM
+- Bu sistem/kavram hangi problemi çözmek için ortaya çıktı?
+- Kendisinden önce ne vardı?
+- Hangi eksiklikleri giderdi?
+- Gelecekte nasıl evrilmesi bekleniyor?`
+    },
+    {
+        id: 'esleme', icon: '🔗', name: 'Yapısal Eşleme',
+        desc: 'Kendi alanınla eşleştir',
+        prompt: `5. YAPISAL EŞLEME
+Bu mekanizmayı {{ALAN}} alanından yapısal olarak tam eşleşen bir sistemle eşleştir.
+Eşleştirme yüzeysel bir benzetme değil, teknik bir izdüşüm olmalı.
+Eşleşmenin nerede bozulduğunu da açıkça belirt.`
+    },
+    {
+        id: 'kontrast', icon: '⚖️', name: 'Kontrast Analizi',
+        desc: 'Benzer kavramlarla karşılaştır',
+        prompt: `6. KONTRAST ANALİZİ
+Bu kavramı en çok karıştırılan 3 alternatif kavram/sistemle karşılaştır.
+Her biri için:
+- Benzerlikler
+- Kritik farklar
+- Hangi durumda hangisi tercih edilir`
+    },
+    {
+        id: 'mental', icon: '🧠', name: 'Mental Model',
+        desc: 'Zihinsel görsel sahne oluştur',
+        prompt: `7. MENTAL MODEL
+Bu konuyu zihnimde tek bir görsel sahne olarak canlandırmam gerekse ne görürdüm?
+Sezgisel, akılda kalıcı bir mental model oluştur.
+Modelin gerçeklikle örtüştüğü ve ayrıştığı noktaları belirt.`
+    },
+    {
+        id: 'diagram', icon: '📊', name: 'ASCII Diyagram',
+        desc: 'Metinsel yapı diyagramı üret',
+        prompt: `8. ASCII DİYAGRAM
+Konunun yapısını veya akışını gösteren detaylı bir ASCII/metinsel diyagram üret.
+Diyagram bileşenler arası ilişkileri, veri akışını veya hiyerarşiyi net göstermeli.`
+    },
+    {
+        id: 'yanilgilar', icon: '❌', name: 'Yanılgılar',
+        desc: 'En yaygın 5 yanlış düşünce',
+        prompt: `9. BAŞLICA YANILGILAR
+Bu konu hakkında en yaygın 5 yanlış düşünceyi listele.
+Her biri için:
+- Yanılgının ne olduğu
+- Neden yaygın olduğu
+- Doğrusunun ne olduğu`
+    },
+    {
+        id: 'basarisizlik', icon: '💥', name: 'Başarısızlık Durumları',
+        desc: 'Sistemin çöktüğü sınır koşulları',
+        prompt: `10. BAŞARISIZLIK DURUMLARI
+Bu kavramın/sistemin hangi durumlarda çöktüğünü, yetersiz kaldığını veya geçersiz olduğunu belirt.
+Sınır koşullarını teknik parametrelerle ifade et.
+Her başarısızlık durumu için tetikleyici koşulu ve sonucu açıkla.`
+    },
+    {
+        id: 'ornekler', icon: '🌍', name: 'Gerçek Dünya Örnekleri',
+        desc: '3 somut uygulama örneği',
+        prompt: `11. GERÇEK DÜNYA ÖRNEKLERİ
+Bu kavramın gerçek dünyada kullanıldığı/gözlemlendiği 3 somut örnek ver.
+Her örnek için:
+- Bağlam
+- Nasıl uygulandığı
+- Sonuç ve etki`
+    },
+    {
+        id: 'pareto', icon: '📐', name: '80/20 Analizi',
+        desc: '%20 ile %80 anlayışı yakala',
+        prompt: `12. 80/20 ANALİZİ
+Bu konunun sadece %20'sini öğrenebilecek olsam, anlamanın %80'ini sağlayacak hangi parçaları öğrenmeliydim?
+Bu kritik %20'yi öncelik sırasıyla listele ve her birinin neden kritik olduğunu açıkla.`
+    },
+    {
+        id: 'quiz', icon: '📝', name: 'İdrak Testi / Quiz',
+        desc: '3 temel + 2 uygulama + 1 transfer',
+        prompt: `13. İDRAK TESTİ
+Konuyu anlayıp anlamadığımı ölçmek için:
+- 3 temel bilgi sorusu
+- 2 uygulama sorusu (kavramı somut bir duruma uygulama)
+- 1 transfer sorusu (kavramı tamamen farklı bir alana uygulama)
+Cevapları hemen verme; önce düşünmem için bekle.`
+    },
+    {
+        id: 'transfer', icon: '🔄', name: 'Transfer Soruları',
+        desc: 'Farklı alanlara uygula',
+        prompt: `14. TRANSFER SORULARI
+Bu kavramın mantığını tamamen farklı bir alana uygulayan 3 düşünce deneyi oluştur.
+Örn: "Bu kavramın prensiplerini X'e uygularsan ne olur?"
+Bu sorular gerçek anlayışı yüzeysel ezberlenmeden ayırmalı.`
+    }
+];
+
+const MOD_TEXTS = {
+    karma:    'Sen öğretmen, sistem analisti, birinci ilkeler düşünürü ve bilgi mimarının birleşimisin. Duruma göre en etkili öğretme yöntemini seçersin: bazen basitleştirirsin, bazen sorgularsın, bazen analiz edersin.',
+    feynman:  'Sen dünyanın en iyi öğretmenisin. Karmaşık konuları 10 yaşındaki birine anlatır gibi basitleştirirsin. Teknik jargon kullanırsan hemen sade dille açıklarsın. Amacın ezberletmek değil, sezgisel anlayış kazandırmak.',
+    sistem:   'Sen bir sistem analisti ve bilgi mimarısısın. Karmaşık konseptleri yapısal olarak çözümler, bileşenler arası ilişkileri haritalar ve mekanizmaları girdi-süreç-çıktı mantığıyla açıklarsın.',
+    sokratik: 'Sen Sokratik yöntemi kullanan bir düşünce koçusun. Doğrudan cevap vermek yerine doğru sorular sorarak beni kendi kendime doğru cevaba ulaştırırsın. Her açıklamadan sonra düşündürücü bir soru sor.',
+    ilkeler:  'Sen bir birinci ilkeler düşünürüsün. Her varsayımı sorgular, her kavramı en temel bileşenlerine indirger ve oradan yukarı doğru yeniden inşa edersin. Hiçbir şeyi \"öyle kabul et\" demezsin.'
+};
+
+const DERINLIK_TEXTS = {
+    temel:    'Açıklamaları kısa ve öz tut. Her bölüm birkaç cümlede özetlenebilmeli.',
+    orta:     'Makul düzeyde detay ver. Önemli nüansları atlamadan ama gereksiz tekrara girmeden anlat.',
+    derin:    'Kapsamlı ve detaylı analiz yap. Her noktayı örneklerle destekle.',
+    kapsamli: 'Mümkün olan en derin ve kapsamlı analizi yap. Her noktayı çok yönlü ele al. Hiçbir detayı atlama.'
+};
+
+const FORMAT_TEXTS = {
+    markdown: 'Hiyerarşik Markdown formatı kullan. Başlıklar, alt başlıklar ve madde işaretleri ile yapılandır.',
+    tablo:    'Mümkün olduğunca tablo formatı kullan. Karşılaştırmaları ve listeleri tablolarda göster.',
+    ders:     'Ders notu formatında yaz. Madde madde, öğrenci dostu, tekrar edilebilir bir yapıda.',
+    quiz:     'Her ana bölümün sonunda mini quiz soruları ekle. Öğrenmeyi pekiştirici formatta yaz.'
+};
+
+const PRESETS = {
+    hizli:    ['ontoloji', 'mekanizma', 'mental', 'pareto'],
+    derin:    ['ontoloji', 'nedensellik', 'mekanizma', 'evrim', 'esleme', 'kontrast', 'mental', 'diagram', 'yanilgilar', 'basarisizlik', 'ornekler', 'pareto'],
+    sinav:    ['ontoloji', 'yanilgilar', 'ornekler', 'pareto', 'quiz', 'transfer'],
+    muhendis: ['ontoloji', 'nedensellik', 'mekanizma', 'esleme', 'kontrast', 'diagram', 'basarisizlik'],
+    tam:      MODULES.map(m => m.id)
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   STATE
+   ═══════════════════════════════════════════════════════════════ */
+let activeModules = new Set();
+let currentPrompt = '';
+
+/* ═══════════════════════════════════════════════════════════════
+   UI — Module grid rendering
+   ═══════════════════════════════════════════════════════════════ */
+function renderModules() {
+    const grid = document.getElementById('modules-grid');
+    grid.innerHTML = MODULES.map(m => `
+        <div class="module-card ${activeModules.has(m.id) ? 'active' : ''}" data-id="${m.id}" onclick="toggleModule('${m.id}')">
+            <span class="module-icon">${m.icon}</span>
+            <div class="module-info">
+                <div class="module-name">${m.name}</div>
+                <div class="module-desc">${m.desc}</div>
+            </div>
+            <div class="module-toggle"></div>
+        </div>
+    `).join('');
+    updateCounter();
+}
+
+function toggleModule(id) {
+    if (activeModules.has(id)) activeModules.delete(id);
+    else activeModules.add(id);
+    clearPresetHighlight();
+    renderModules();
+}
+
+function selectAll() {
+    MODULES.forEach(m => activeModules.add(m.id));
+    renderModules();
+}
+
+function deselectAll() {
+    activeModules.clear();
+    clearPresetHighlight();
+    renderModules();
+}
+
+function updateCounter() {
+    document.getElementById('mod-counter').textContent = `${activeModules.size} / ${MODULES.length}`;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PRESETS
+   ═══════════════════════════════════════════════════════════════ */
+document.querySelectorAll('.preset-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const key = btn.dataset.preset;
+        activeModules = new Set(PRESETS[key]);
+        clearPresetHighlight();
+        btn.classList.add('active');
+        renderModules();
+    });
+});
+
+function clearPresetHighlight() {
+    document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PROMPT GENERATION
+   ═══════════════════════════════════════════════════════════════ */
+function generatePrompt() {
+    const konu = document.getElementById('inp-konu').value.trim();
+    if (!konu) {
+        toast('⚠️ Lütfen bir konu girin.', 'warn');
+        document.getElementById('inp-konu').focus();
+        return;
+    }
+    const alan      = document.getElementById('inp-alan').value.trim() || 'belirtilmedi';
+    const seviye    = document.getElementById('sel-seviye').value;
+    const mod       = document.getElementById('sel-mod').value;
+    const derinlik  = document.getElementById('sel-derinlik').value;
+    const format    = document.getElementById('sel-format').value;
+
+    const selectedModules = MODULES.filter(m => activeModules.has(m.id));
+    if (selectedModules.length === 0) {
+        toast('⚠️ En az bir modül seçin.', 'warn');
+        return;
+    }
+
+    // Build prompt
+    let parts = [];
+
+    // System role
+    parts.push(`SİSTEM ROLÜ:\n${MOD_TEXTS[mod]}`);
+
+    // Goal
+    parts.push(`AMAÇ:\n"${konu}" konusunu yüzeysel değil, mekanik ve nedensel seviyede anlamamı sağlamak.`);
+
+    // User profile
+    const seviyeLabel = seviye === 'otomatik' ? 'AI tarafından belirlenecek (Seviye Kalibrasyonu modülü aktif)' : seviye.charAt(0).toUpperCase() + seviye.slice(1);
+    parts.push(`KULLANICI PROFİLİ:\nHakim Alan: ${alan}\nSeviye: ${seviyeLabel}`);
+
+    // Depth & format
+    parts.push(`ANALİZ DERİNLİĞİ:\n${DERINLIK_TEXTS[derinlik]}`);
+
+    // Tasks
+    const taskPrompts = selectedModules.map(m => {
+        return m.prompt.replace('{{ALAN}}', alan);
+    });
+    parts.push(`GÖREVLER:\n\n${taskPrompts.join('\n\n')}`);
+
+    // Format
+    parts.push(`FORMAT:\n${FORMAT_TEXTS[format]}\n- Doğrudan konuya gir, gereksiz giriş cümlesi yazma.\n- Teknik terim kullanırsan hemen sade dille açıkla.\n- Belirsiz yer varsa bunu açıkça belirt.`);
+
+    currentPrompt = parts.join('\n\n─────────────────────────────────\n\n');
+
+    // Render
+    const box = document.getElementById('preview-box');
+    box.textContent = currentPrompt;
+
+    // Stats
+    const chars = currentPrompt.length;
+    const tokens = Math.round(chars / 3.5);
+    document.getElementById('stat-chars').textContent = `${chars.toLocaleString('tr-TR')} karakter`;
+    document.getElementById('stat-tokens').textContent = `~${tokens.toLocaleString('tr-TR')} token`;
+    document.getElementById('stat-modules').textContent = `${selectedModules.length} modül`;
+
+    toast('✅ Prompt başarıyla üretildi!');
+    document.getElementById('preview-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ACTIONS
+   ═══════════════════════════════════════════════════════════════ */
+function copyPrompt() {
+    if (!currentPrompt) { toast('⚠️ Önce prompt üretin.', 'warn'); return; }
+    navigator.clipboard.writeText(currentPrompt).then(() => {
+        toast('📋 Panoya kopyalandı!');
+    }).catch(() => {
+        // Fallback
+        const ta = document.createElement('textarea');
+        ta.value = currentPrompt;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        toast('📋 Panoya kopyalandı!');
+    });
+}
+
+function openGemini() {
+    if (!currentPrompt) {
+        toast('⚠️ Önce prompt üretin.', 'warn');
+        return;
+    }
+    const url = 'https://gemini.google.com/app?prompt=' + encodeURIComponent(currentPrompt);
+    window.open(url, '_blank');
+    toast('✦ Gemini açılıyor...');
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PERSISTENCE — LocalStorage
+   ═══════════════════════════════════════════════════════════════ */
+const STORAGE_KEY = 'learning-os-settings-v2';
+
+function saveSettings() {
+    const data = {
+        konu:     document.getElementById('inp-konu').value,
+        alan:     document.getElementById('inp-alan').value,
+        seviye:   document.getElementById('sel-seviye').value,
+        mod:      document.getElementById('sel-mod').value,
+        derinlik: document.getElementById('sel-derinlik').value,
+        format:   document.getElementById('sel-format').value,
+        modules:  [...activeModules]
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    toast('💾 Ayarlar kaydedildi!');
+}
+
+function loadSettings() {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    try {
+        const data = JSON.parse(raw);
+        if (data.konu)     document.getElementById('inp-konu').value     = data.konu;
+        if (data.alan)     document.getElementById('inp-alan').value     = data.alan;
+        if (data.seviye)   document.getElementById('sel-seviye').value   = data.seviye;
+        if (data.mod)      document.getElementById('sel-mod').value      = data.mod;
+        if (data.derinlik) document.getElementById('sel-derinlik').value = data.derinlik;
+        if (data.format)   document.getElementById('sel-format').value   = data.format;
+        if (data.modules)  activeModules = new Set(data.modules);
+    } catch(e) { /* skip corrupt data */ }
+}
+
+function resetAll() {
+    document.getElementById('inp-konu').value = '';
+    document.getElementById('inp-alan').value = '';
+    document.getElementById('sel-seviye').value  = 'otomatik';
+    document.getElementById('sel-mod').value      = 'karma';
+    document.getElementById('sel-derinlik').value = 'orta';
+    document.getElementById('sel-format').value   = 'markdown';
+    activeModules.clear();
+    clearPresetHighlight();
+    currentPrompt = '';
+    document.getElementById('preview-box').innerHTML = '<div class="preview-empty">Konu girin ve "Prompt Üret" butonuna tıklayın.</div>';
+    document.getElementById('stat-chars').textContent   = '0 karakter';
+    document.getElementById('stat-tokens').textContent  = '~0 token';
+    document.getElementById('stat-modules').textContent = '0 modül';
+    localStorage.removeItem(STORAGE_KEY);
+    renderModules();
+    toast('↺ Sıfırlandı.');
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TOAST
+   ═══════════════════════════════════════════════════════════════ */
+function toast(msg, type = 'info') {
+    const container = document.getElementById('toast-container');
+    const el = document.createElement('div');
+    el.className = 'toast';
+    if (type === 'warn') el.style.borderColor = 'rgba(245,158,11,0.5)';
+    el.textContent = msg;
+    container.appendChild(el);
+    setTimeout(() => {
+        el.classList.add('out');
+        setTimeout(() => el.remove(), 300);
+    }, 2800);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   KEYBOARD SHORTCUTS
+   ═══════════════════════════════════════════════════════════════ */
+document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        generatePrompt();
+    }
+});
+
+/* ═══════════════════════════════════════════════════════════════
+   INIT
+   ═══════════════════════════════════════════════════════════════ */
+loadSettings();
+renderModules();
+</script>
+</body>
+</html>

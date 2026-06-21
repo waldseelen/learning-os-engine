@@ -1,0 +1,331 @@
+[
+  {
+    "id": "kalibrasyon",
+    "icon": "🎯",
+    "name": "Seviye Kalibrasyonu",
+    "desc": "Seviyeni 3 soruyla ölç",
+    "explain": "Konuya başlamadan önce mevcut bilgi seviyenizi ölçerek anlatımın derinliğini size göre uyarlar.",
+    "requires": [],
+    "prompt": "0. SEVİYE KALİBRASYONU\nKonuya başlamadan önce seviyemi ölçmek için 3 kısa, hedefli soru sor.\nCevaplarıma göre seviyemi belirle: Acemi / Orta / İleri / Uzman.\nTüm sonraki açıklamaları bu seviyeye göre ölçeklendir.",
+    "layer": "foundation"
+  },
+  {
+    "id": "onkosul",
+    "icon": "🗺️",
+    "name": "Ön Koşul Haritası",
+    "desc": "Ne bilinmeli?",
+    "explain": "Bu konuyu öğrenmeden önce mutlaka anlaşılması gereken alt kavramları listeler.",
+    "requires": [],
+    "prompt": "ÖN KOŞUL HARİTASI\nBu konuyu öğrenmek için gerekli ön koşul bilgileri sırala.\n- Zorunlu ön bilgiler\n- Faydalı ön bilgiler\n- Gereksiz görünen ama işimi kolaylaştıracak bilgiler\nBir öğrenme ağacı oluştur.",
+    "layer": "foundation"
+  },
+  {
+    "id": "sirasi",
+    "icon": "🎯",
+    "name": "Öğrenme Sırası",
+    "desc": "Hangi sırayla öğrenmeliyim?",
+    "explain": "Karmaşık bir konuyu en verimli ve mantıksal sırayla parçalara bölerek adım adım rota çıkarır.",
+    "requires": [
+      "onkosul"
+    ],
+    "prompt": "ÖĞRENME SIRASI\nBu konuyu öğrenmek için en verimli öğrenme sırasını oluştur.\nHer aşama için:\n- Hedef\n- Öğrenilecek kavramlar\n- Başarı kriteri",
+    "layer": "foundation"
+  },
+  {
+    "id": "ontoloji",
+    "icon": "🧬",
+    "name": "Ontoloji (İlkeler)",
+    "desc": "Temel yapı taşlarını belirle",
+    "explain": "Sistemi oluşturan en küçük parçaları bulur ve \"neden\" var olduklarını sorgular.",
+    "requires": [],
+    "prompt": "ONTOLOJİ (Birinci İlkeler)\nBu konuyu oluşturan en temel, bölünemez 3-5 yapı taşını belirle.\nHer birinin tanımını, rolünü ve diğerleriyle ilişkisini açıkla.\nBu bileşenler olmadan konseptin neden var olamayacağını göster.",
+    "layer": "foundation"
+  },
+  {
+    "id": "nedensellik",
+    "icon": "⚡",
+    "name": "Nedensel Zorunluluk",
+    "desc": "Neden var olduğunu açıkla",
+    "explain": "Her bir parçanın varlık amacını, yokluğunda sistemin neden çökeceğini kanıtlar.",
+    "requires": [
+      "ontoloji"
+    ],
+    "prompt": "NEDENSEL ZORUNLULUK\nHer yapı taşı için şu soruları cevapla:\n- Bu bileşen ortadan kalkarsa sistem neden çalışamaz?\n- Bu parçanın evrimsel, fiziksel veya mantıksal zorunluluğu nedir?\n- Alternatifi var mı? Varsa neden bu tercih edildi?",
+    "layer": "foundation"
+  },
+  {
+    "id": "mekanizma",
+    "icon": "⚙️",
+    "name": "Mekanizma",
+    "desc": "Girdi → Süreç → Çıktı",
+    "explain": "Sistemin nasıl çalıştığını adım adım bir makine gibi haritalandırarak açıklar.",
+    "requires": [
+      "ontoloji"
+    ],
+    "prompt": "MEKANİZMA\nSistemin çalışma mekanizmasını adım adım çözümle:\n- Girdi: Sisteme ne girer?\n- Süreç: İçeride ne olur? Her adımı sırayla anlat.\n- Çıktı: Sonuçta ne üretilir?\n- Geri bildirim döngüsü varsa belirt.",
+    "layer": "mechanism"
+  },
+  {
+    "id": "insa",
+    "icon": "🧱",
+    "name": "Bilgi İnşası",
+    "desc": "Sıfırdan kurmak",
+    "explain": "Sanki konuyu ilk defa siz icat ediyormuşsunuz gibi konuyu baştan inşa eder.",
+    "requires": [
+      "mekanizma"
+    ],
+    "prompt": "BİLGİ İNŞASI\nBu konuyu insanlık hiç bilmiyormuş gibi sıfırdan yeniden keşfet.\nHer adımda:\n- Karşılaşılan problem\n- Üretilen çözüm\n- Yeni ortaya çıkan sorun",
+    "layer": "mechanism"
+  },
+  {
+    "id": "tersine",
+    "icon": "🔄",
+    "name": "Tersine Mühendislik",
+    "desc": "Sonuçtan sebebe gitmek",
+    "explain": "Nihai sonuca bakarak, geriye doğru hangi aşamalardan geçildiğini analiz eder.",
+    "requires": [
+      "mekanizma"
+    ],
+    "prompt": "TERSİNE MÜHENDİSLİK\nBu sistemin çıktısını ver.\nBenim için geriye doğru çalışarak hangi süreçlerin gerçekleşmiş olması gerektiğini göster.",
+    "layer": "mechanism"
+  },
+  {
+    "id": "evrim",
+    "icon": "📜",
+    "name": "Tarihsel Evrim",
+    "desc": "Nasıl ve neden ortaya çıktı",
+    "explain": "Konunun tarih boyunca hangi problemlere çözüm olarak geliştirildiğini açıklar.",
+    "requires": [],
+    "prompt": "TARİHSEL EVRİM\n- Bu sistem/kavram hangi problemi çözmek için ortaya çıktı?\n- Kendisinden önce ne vardı?\n- Hangi eksiklikleri giderdi?\n- Gelecekte nasıl evrilmesi bekleniyor?",
+    "layer": "context"
+  },
+  {
+    "id": "rakip",
+    "icon": "⚔️",
+    "name": "Rakip Teoriler",
+    "desc": "Alternatifleri görmek",
+    "explain": "Konuya alternatif olan diğer yaklaşımları artıları ve eksileriyle değerlendirir.",
+    "requires": [],
+    "prompt": "RAKİP TEORİLER\nBu konuya alternatif yaklaşımlar nelerdir?\n- Güçlü yönleri\n- Zayıf yönleri\n- Hangi durumda üstün oldukları",
+    "layer": "context"
+  },
+  {
+    "id": "kontrast",
+    "icon": "⚖️",
+    "name": "Kontrast Analizi",
+    "desc": "Benzer kavramlarla karşılaştır",
+    "explain": "En çok karıştırılan kavramlarla arasındaki ince çizgileri belirginleştirir.",
+    "requires": [],
+    "prompt": "KONTRAST ANALİZİ\nBu kavramı en çok karıştırılan 3 alternatif kavramla karşılaştır.\nHer biri için:\n- Benzerlikler\n- Kritik farklar\n- Hangi durumda hangisi tercih edilir",
+    "layer": "context"
+  },
+  {
+    "id": "esleme",
+    "icon": "🔗",
+    "name": "Yapısal Eşleme",
+    "desc": "Kendi alanınla eşleştir",
+    "explain": "Öğrenilecek kavramı zaten hakim olduğunuz bir alanla teknik olarak eşleştirir.",
+    "requires": [],
+    "prompt": "YAPISAL EŞLEME\nBu mekanizmayı {{ALAN}} alanından yapısal olarak tam eşleşen bir sistemle eşleştir.\nEşleştirme yüzeysel bir benzetme değil, teknik bir izdüşüm olmalı.\nEşleşmenin nerede bozulduğunu da açıkça belirt.",
+    "layer": "context"
+  },
+  {
+    "id": "disiplinler",
+    "icon": "🔗",
+    "name": "Disiplinlerarası",
+    "desc": "Başka alanlarla ilişkilendir",
+    "explain": "Fizik, matematik, biyoloji veya ekonomi gibi farklı bilim dallarındaki karşılığını arar.",
+    "requires": [],
+    "prompt": "DİSİPLİNLERARASI BAĞLANTILAR\nBu konunun:\n- Matematikte\n- Fizikte\n- Biyolojide\n- Ekonomide\nkarşılık gelen benzer prensiplerini göster.",
+    "layer": "context"
+  },
+  {
+    "id": "mental",
+    "icon": "🧠",
+    "name": "Mental Model",
+    "desc": "Zihinsel görsel sahne",
+    "explain": "Konuyu zihninizde anında canlandırabileceğiniz bir senaryo haline getirir.",
+    "requires": [],
+    "prompt": "MENTAL MODEL\nBu konuyu zihnimde tek bir görsel sahne olarak canlandırmam gerekse ne görürdüm?\nSezgisel, akılda kalıcı bir mental model oluştur.\nModelin gerçeklikle örtüştüğü ve ayrıştığı noktaları belirt.",
+    "layer": "visualization"
+  },
+  {
+    "id": "diagram",
+    "icon": "📊",
+    "name": "Konu Grafiği (DAG)",
+    "desc": "Metinsel yapı haritası",
+    "explain": "Kavramlar arası yönlü ve ağsal ilişkileri ASCII veya metinsel diyagramlarla çizer.",
+    "requires": [
+      "ontoloji"
+    ],
+    "prompt": "KONU GRAFİĞİ (DAG)\nKonunun alt bileşenlerini bir DAG (yönlü grafik) olarak çıkar:\n- düğümler\n- bağımlılıklar\n- kritik noktalar\nBunu net bir ASCII veya metinsel yapı diyagramı olarak çiz.",
+    "layer": "visualization"
+  },
+  {
+    "id": "simulasyon",
+    "icon": "🎮",
+    "name": "Simülasyon Modu",
+    "desc": "Sistemin içinden anlatım",
+    "explain": "Sizi sistemin bir parçası gibi varsayarak süreci içten yaşatır.",
+    "requires": [
+      "mekanizma"
+    ],
+    "prompt": "SİMÜLASYON MODU\nBu sistemin içinde bir bileşenmişim gibi davran.\nBana adım adım ne yaşadığımı anlat. (Örn: Elektron olarak transistörde veya veri paketi olarak TCP ağında)",
+    "layer": "visualization"
+  },
+  {
+    "id": "deney",
+    "icon": "🧪",
+    "name": "Düşünce Deneyi",
+    "desc": "Zihinde çalıştırmak",
+    "explain": "Konunun prensiplerini uç durumlarda test eden zihinsel deneyler kurgular.",
+    "requires": [
+      "mekanizma"
+    ],
+    "prompt": "DÜŞÜNCE DENEYİ\nBu konuyu anlamam için 3 düşünce deneyi oluştur.\nSonucu hemen verme.\nÖnce tahmin etmemi iste.",
+    "layer": "visualization"
+  },
+  {
+    "id": "yanilgilar",
+    "icon": "❌",
+    "name": "Yanılgılar",
+    "desc": "En yaygın 5 yanlış düşünce",
+    "explain": "İnsanların bu konuda düştüğü kavramsal tuzakları ve neden yanlış olduklarını açıklar.",
+    "requires": [],
+    "prompt": "BAŞLICA YANILGILAR\nBu konu hakkında en yaygın 5 yanlış düşünceyi listele.\nHer biri için:\n- Yanılgının ne olduğu\n- Neden yaygın olduğu\n- Doğrusunun ne olduğu",
+    "layer": "boundaries"
+  },
+  {
+    "id": "varsayimlar",
+    "icon": "🔍",
+    "name": "Gizli Varsayımlar",
+    "desc": "Teorinin altında ne saklı?",
+    "explain": "Sistemin çalışması için sık sık unutulan varsayımları açığa çıkarır.",
+    "requires": [],
+    "prompt": "GİZLİ VARSAYIMLAR\nBu konu hangi varsayımlar üzerine kuruludur?\n- Açık varsayımlar\n- Gizli varsayımlar\n- Varsayım bozulursa ne olur?",
+    "layer": "boundaries"
+  },
+  {
+    "id": "basarisizlik",
+    "icon": "💥",
+    "name": "Başarısızlık Durumu",
+    "desc": "Sistemin çöktüğü anlar",
+    "explain": "Hangi koşullar sağlandığında teorinin veya sistemin çöktüğünü teknik olarak izah eder.",
+    "requires": [],
+    "prompt": "BAŞARISIZLIK DURUMLARI\nBu kavramın/sistemin hangi durumlarda çöktüğünü veya geçersiz olduğunu belirt.\nSınır koşullarını teknik parametrelerle ifade et.\nHer başarısızlık durumu için tetikleyici koşulu ve sonucu açıkla.",
+    "layer": "boundaries"
+  },
+  {
+    "id": "kirilma",
+    "icon": "🚨",
+    "name": "Kırılma Noktaları",
+    "desc": "Nerede işler bozuluyor?",
+    "explain": "Sistemdeki kritik zayıflıkları (Single Point of Failure) bulur.",
+    "requires": [
+      "basarisizlik"
+    ],
+    "prompt": "KIRILMA NOKTALARI\nBu sistemin en hassas noktaları nelerdir?\n- Tek hata noktaları\n- Kritik bağımlılıklar\n- Kırılma senaryoları",
+    "layer": "boundaries"
+  },
+  {
+    "id": "olcek",
+    "icon": "📈",
+    "name": "Ölçek Analizi",
+    "desc": "Sistem büyüyünce ne olur?",
+    "explain": "Sistem 10x küçüldüğünde veya 100x büyüdüğünde kuralların nasıl değiştiğini analiz eder.",
+    "requires": [
+      "mekanizma"
+    ],
+    "prompt": "ÖLÇEK ANALİZİ\nBu sistem:\n- 10 kat küçülürse\n- 100 kat büyürse\nhangi davranışları değişir?",
+    "layer": "boundaries"
+  },
+  {
+    "id": "celiski",
+    "icon": "🔥",
+    "name": "Çelişki Modu",
+    "desc": "Paradoksları bul",
+    "explain": "Teorinin kendi içindeki tutarsızlıkları bularak araştırma seviyesine çıkmanızı sağlar.",
+    "requires": [
+      "varsayimlar"
+    ],
+    "prompt": "ÇELİŞKİ MODU\nBu konunun içindeki paradoksları ve çelişkileri bul.\n- Hangi durumlarda teori kırılır?\n- Hangi mantıksal çıkmazlar var?\nBeni yüzeyden çıkarıp araştırma seviyesine taşı.",
+    "layer": "boundaries"
+  },
+  {
+    "id": "ornekler",
+    "icon": "🌍",
+    "name": "Gerçek Dünya Örnek.",
+    "desc": "3 somut uygulama",
+    "explain": "Soyut konseptlerin gerçek hayatta veya endüstride nasıl vücut bulduğunu gösterir.",
+    "requires": [],
+    "prompt": "GERÇEK DÜNYA ÖRNEKLERİ\nBu kavramın gerçek dünyada kullanıldığı/gözlemlendiği 3 somut örnek ver.\nHer örnek için:\n- Bağlam\n- Nasıl uygulandığı\n- Sonuç ve etki",
+    "layer": "application"
+  },
+  {
+    "id": "uzman",
+    "icon": "🧠",
+    "name": "Uzman Gibi Düşün",
+    "desc": "Uzman zihniyeti",
+    "explain": "Acemilerin gözden kaçırdığı detayları uzmanların anında nasıl fark ettiğini açıklar.",
+    "requires": [],
+    "prompt": "UZMAN GİBİ DÜŞÜN\nBu konuda uzman biri, acemilerin fark etmediği hangi şeyleri hemen fark eder?\nBana 5 örnek ver.",
+    "layer": "application"
+  },
+  {
+    "id": "pareto",
+    "icon": "📐",
+    "name": "80/20 Analizi",
+    "desc": "%20 efor, %80 anlayış",
+    "explain": "Tüm detaya boğulmak yerine, işin özünü oluşturan kritik %20'lik dilimi filtreler.",
+    "requires": [],
+    "prompt": "80/20 ANALİZİ\nBu konunun sadece %20'sini öğrenebilecek olsam, anlamanın %80'ini sağlayacak hangi parçaları öğrenmeliydim?\nBu kritik %20'yi öncelik sırasıyla listele ve her birinin neden kritik olduğunu açıkla.",
+    "layer": "application"
+  },
+  {
+    "id": "kaynak",
+    "icon": "📚",
+    "name": "Kaynak Haritası",
+    "desc": "Sonraki adımlar",
+    "explain": "Öğrenmeye devam etmek için kalibre edilmiş kaynaklar (kitap, video vb.) önerir.",
+    "requires": [],
+    "prompt": "KAYNAK HARİTASI\nBu konuyu derinlemesine öğrenmek için:\n- Başlangıç seviyesi\n- Orta seviye\n- İleri seviye\nen iyi kaynakları (kitap, makale, döküman vb.) öner.",
+    "layer": "application"
+  },
+  {
+    "id": "quiz",
+    "icon": "📝",
+    "name": "İdrak Testi / Quiz",
+    "desc": "Bilgi ve uygulama soruları",
+    "explain": "Gerçekten anladığınızı teyit etmek için hem bilgi ölçen hem de uygulatan sorular sorar.",
+    "requires": [
+      "ontoloji",
+      "mekanizma"
+    ],
+    "prompt": "İDRAK TESTİ\nKonuyu anlayıp anlamadığımı ölçmek için:\n- 3 temel bilgi sorusu\n- 2 uygulama sorusu (kavramı somut bir duruma uygulama)\n- 1 transfer sorusu (kavramı tamamen farklı bir alana uygulama)\nCevapları hemen verme; önce düşünmem için bekle.",
+    "layer": "evaluation"
+  },
+  {
+    "id": "transfer",
+    "icon": "🔄",
+    "name": "Transfer Soruları",
+    "desc": "Farklı alanlara uygula",
+    "explain": "Öğrendiğiniz yapıyı, birbirinden alakasız görünen bambaşka bir disipline uyarlamanızı ister.",
+    "requires": [
+      "mekanizma"
+    ],
+    "prompt": "TRANSFER SORULARI\nBu kavramın mantığını tamamen farklı bir alana uygulayan 3 düşünce deneyi oluştur.\nÖrn: \"Bu kavramın prensiplerini X'e uygularsan ne olur?\"\nBu sorular gerçek anlayışı yüzeysel ezberlenmeden ayırmalı.",
+    "layer": "evaluation"
+  },
+  {
+    "id": "gelecek",
+    "icon": "🔮",
+    "name": "Gelecek Projeksiyonu",
+    "desc": "Nereye evriliyor?",
+    "explain": "Bu konunun veya teknolojinin 5, 10 veya 50 yıl içinde nasıl şekilleneceğini tahmin eder.",
+    "requires": [
+      "evrim"
+    ],
+    "prompt": "GELECEK PROJEKSİYONU\nBu konunun/teknolojinin gelecekteki evrimini projelendir.\n- 5 yıl sonra nasıl görünecek?\n- 20 yıl sonra nasıl görünecek?\n- Diğer sektörlerde hangi paradigma değişimlerini tetikleyecek?",
+    "layer": "projection"
+  }
+]
