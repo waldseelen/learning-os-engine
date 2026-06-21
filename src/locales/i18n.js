@@ -1,6 +1,6 @@
 export const i18n = {
  tr: {
- badge: 'Learning Operating System',
+ badge: 'PROMPTER',
  title: 'Parametrik Prompt Mühendisi',
  subtitle: 'Herhangi bir konuyu sistematik olarak parçala, analiz et, öğren.',
  topicLabel: 'Öğrenilecek Konu',
@@ -89,7 +89,7 @@ export const i18n = {
  statComplexity: 'Karmaşıklık Skoru'
  },
  en: {
- badge: 'Learning Operating System',
+ badge: 'PROMPTER',
  title: 'Parametric Prompt Engineer',
  subtitle: 'Systematically deconstruct, analyze, and learn any topic.',
  topicLabel: 'Topic to Learn',
