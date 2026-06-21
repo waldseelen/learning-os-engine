@@ -7,10 +7,21 @@ export default function OnboardingTour() {
     const { config, showTour, completeTour } = useEngineState();
     const [currentStep, setCurrentStep] = useState(0);
     const [coords, setCoords] = useState(null);
+    const [isMobile, setIsMobile] = useState(false);
     const cardRef = useRef(null);
 
     const t = getTranslation(config.lang);
     const steps = t.tour?.steps || [];
+
+    // Listen to resize to determine mobile state
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth < 768);
+        };
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
 
     // Reset step when tour is launched
     useEffect(() => {
@@ -50,34 +61,34 @@ export default function OnboardingTour() {
                         right: '16px',
                         width: 'auto',
                         maxWidth: 'none',
-                        zIndex: 10001
+                        zIndex: 10005
                     });
                 } else {
-                    // Position floating card relative to highlighted block
+                    // Position floating card relative to highlighted block using viewport-relative 'fixed' layout
                     if (selector === '.sidebar') {
                         setCoords({
-                            position: 'absolute',
-                            top: `${rect.top + window.scrollY}px`,
+                            position: 'fixed',
+                            top: `${rect.top}px`,
                             left: `${rect.right + 20}px`,
                             width: '320px',
-                            zIndex: 10001
+                            zIndex: 10005
                         });
                     } else if (selector === '.main-content') {
                         setCoords({
-                            position: 'absolute',
-                            top: `${rect.bottom + 20 + window.scrollY}px`,
+                            position: 'fixed',
+                            top: `${rect.top + 20}px`,
                             left: `${rect.left + rect.width / 2}px`,
                             transform: 'translateX(-50%)',
                             width: '320px',
-                            zIndex: 10001
+                            zIndex: 10005
                         });
                     } else if (selector === '.right-sidebar') {
                         setCoords({
-                            position: 'absolute',
-                            top: `${rect.top + window.scrollY}px`,
+                            position: 'fixed',
+                            top: `${rect.top}px`,
                             left: `${rect.left - 340}px`,
                             width: '320px',
-                            zIndex: 10001
+                            zIndex: 10005
                         });
                     } else {
                         setCoords({
@@ -86,7 +97,7 @@ export default function OnboardingTour() {
                             left: '50%',
                             transform: 'translate(-50%, -50%)',
                             width: '360px',
-                            zIndex: 10001
+                            zIndex: 10005
                         });
                     }
                 }
@@ -110,12 +121,12 @@ export default function OnboardingTour() {
                 transform: 'translate(-50%, -50%)',
                 width: '380px',
                 maxWidth: 'calc(100% - 32px)',
-                zIndex: 10001
+                zIndex: 10005
             });
         }
     }, [currentStep, showTour, steps]);
 
-    if (!showTour || steps.length === 0) return null;
+    if (!showTour || isMobile || steps.length === 0) return null;
 
     const step = steps[currentStep];
     const isFirst = currentStep === 0;
@@ -123,6 +134,7 @@ export default function OnboardingTour() {
 
     const handleNext = () => {
         if (isLast) {
+            localStorage.setItem('prompter-tour-completed', 'true');
             completeTour();
         } else {
             setCurrentStep(prev => prev + 1);
@@ -136,6 +148,7 @@ export default function OnboardingTour() {
     };
 
     const handleSkip = () => {
+        localStorage.setItem('prompter-tour-completed', 'true');
         completeTour();
     };
 

@@ -28,6 +28,7 @@ export default function Header() {
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexShrink: 0 }}>
                 <button 
                     onClick={startTour}
+                    className="header-tour-btn"
                     style={{ background: 'transparent', border: '1px solid var(--border)', borderRadius: '4px', cursor: 'pointer', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s', width: '28px', height: '28px' }}
                     title={t.tour?.btnReplay || 'Quick Tour'}
                     onMouseEnter={e => e.target.style.color = 'var(--text-primary)'}

@@ -726,6 +726,7 @@
         }
 
         .tour-card {
+            z-index: 10005;
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: 8px;
@@ -874,7 +875,7 @@
 
         .tour-highlighted {
             position: relative !important;
-            z-index: 10002 !important;
+            z-index: 10001 !important;
             box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5), 0 0 20px rgba(94, 106, 210, 0.4) !important;
             pointer-events: none !important;
             transition: box-shadow 0.3s ease !important;
@@ -882,4 +883,10 @@
 
         :root[data-theme="light"] .tour-highlighted {
             box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.35), 0 0 20px rgba(0, 0, 0, 0.15) !important;
+        }
+
+        @media (max-width: 767px) {
+            .header-tour-btn {
+                display: none !important;
+            }
         }

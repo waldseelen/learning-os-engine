@@ -20,10 +20,12 @@ export default function App() {
     const t = getTranslation(config.lang);
 
     useEffect(() => {
-        if (!config.tourCompleted) {
+        const isMobile = window.innerWidth < 768;
+        const tourCompleted = localStorage.getItem('prompter-tour-completed') === 'true';
+        if (!tourCompleted && !isMobile) {
             startTour();
         }
-    }, [config.tourCompleted, startTour]);
+    }, [startTour]);
 
     useEffect(() => {
         const root = document.documentElement;
